@@ -27,10 +27,45 @@ const logoutBtn = document.getElementById('logout-btn');
 
 // ===== OAuth Buttons =====
 // ===== Google OAuth Login (completed) =====
-// ===== OAuth Buttons =====
-document.getElementById('google-login').addEventListener('click', () => {
-    window.location.href = 'https://nnlvs.onrender.com/auth/google';
+const googleLoginBtn = document.getElementById('google-login');
+
+googleLoginBtn.addEventListener('click', () => {
+    google.accounts.id.initialize({
+        client_id: '942613118245-ber24g6vpbqtj0lkturq0mo12hqinf59.apps.googleusercontent.com',
+        callback: handleGoogleCredentialResponse
+    });
+
+    google.accounts.id.prompt(); // show Google Sign-In popup
 });
+
+async function handleGoogleCredentialResponse(response) {
+    // The token from Google
+    const googleIdToken = response.credential;
+
+    try {
+        const res = await fetch('https://nnlvsstore.onrender.com/auth/google', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: googleIdToken })
+        });
+
+        const data = await res.json();
+        console.log('Server Response:', data);
+
+        if (res.ok) {
+            localStorage.setItem('token', data.token);
+            showNotification(`Logged in as ${data.user.name}`, 'success');
+            loginBtn.innerHTML = `<i class="far fa-user-circle"></i><span>${data.user.name.split(' ')[0]}</span>`;
+            loginModal.classList.add('hidden');
+            document.body.style.overflow = '';
+        } else {
+            showNotification(data.error || 'Google login failed', 'error');
+        }
+    } catch (err) {
+        console.error(err);
+        showNotification('Server error', 'error');
+    }
+}
 // ===== Modal Open/Close =====
 loginBtn.addEventListener('click', () => {
     loginModal.classList.remove('hidden');
@@ -663,6 +698,7 @@ searchBtn.addEventListener('click', searchProducts);
 searchInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') searchProducts();
 });
+
 
 
 
