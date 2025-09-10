@@ -6,12 +6,11 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const { OAuth2Client } = require('google-auth-library');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET;
-
+const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // ========================
 // MIDDLEWARE
@@ -20,15 +19,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-app.use(cors({ origin: 'https://nnlvsstore.onrender.com', credentials: true }));
-app.use(bodyParser.json());
-app.use(session({ 
-    secret: process.env.JWT_SECRET, 
-    resave: false, 
-    saveUninitialized: true 
-}));
-app.use(passport.initialize());
-app.use(passport.session());
 // ========================
 // IN-MEMORY STORAGE
 // ========================
@@ -62,25 +52,30 @@ const authMiddleware = (req, res, next) => {
 // ========================
 
 // ----- Google OAuth Login -----
+app.post('/auth/google', async (req, res) => {
+  const { token } = req.body;
+  if (!token) return res.status(400).json({ error: 'No token provided' });
 
-passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "https://nnlvs.onrender.com/auth/google/callback"
-  },
-  (accessToken, refreshToken, profile, done) => {
-    users[profile.emails[0].value] = { password: null, email: profile.emails[0].value };
-    return done(null, profile);
+  try {
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+
+    const payload = ticket.getPayload();
+    const email = payload.email;
+
+    if (!users[email]) {
+      users[email] = { name: payload.name, email, password: null, cart: [] };
+    }
+
+    const jwtToken = jwt.sign({ email, name: payload.name }, JWT_SECRET, { expiresIn: '1d' });
+    res.json({ token: jwtToken, user: { email, name: payload.name } });
+  } catch (err) {
+    console.error('Google auth error:', err);
+    res.status(401).json({ error: 'Invalid Google token' });
   }
-));
-
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/' }),
-  (req, res) => {
-    res.redirect('https://nnlvs.onrender.com/myecommerce.html'); 
-  }
-);
-
+});
 
 // ----- Signup -----
 app.post('/auth/signup', async (req, res) => {
@@ -159,17 +154,8 @@ app.delete('/cart', authMiddleware, (req, res) => {
   res.json({ message: 'Removed from cart' });
 });
 
-
-// Serve everything in public folder
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Root route
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
 // ========================
 // START SERVER
 // ========================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
-
