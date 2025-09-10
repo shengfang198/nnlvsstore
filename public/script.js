@@ -26,13 +26,25 @@ const logoutBtn = document.getElementById('logout-btn');
 
 
 // ===== OAuth Buttons =====
-document.getElementById('google-login').addEventListener('click', () => {
-    window.location.href = 'https://nnlvsstore.onrender.com/auth/google';
-});
+ const googleLoginBtn = document.getElementById('google-login');
 
-// document.getElementById('facebook-login').addEventListener('click', () => {
-//     window.location.href = 'http://localhost:4000/auth/facebook';
-// });
+  googleLoginBtn.addEventListener('click', async () => {
+    // Suppose you already got googleIdToken from Google's SDK
+    const googleIdToken = 'YOUR_GOOGLE_ID_TOKEN';
+
+    try {
+      const res = await fetch('https://nnlvsstore.onrender.com/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: googleIdToken })
+      });
+
+      const data = await res.json();
+      console.log(data); // contains JWT token and user info
+    } catch (err) {
+      console.error(err);
+    }
+  });
 
 // ===== Modal Open/Close =====
 loginBtn.addEventListener('click', () => {
@@ -666,6 +678,7 @@ searchBtn.addEventListener('click', searchProducts);
 searchInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') searchProducts();
 });
+
 
 
 
