@@ -1,4 +1,4 @@
-const API = "http://localhost:3000";
+const API = "https://nnlvsstore.onrender.com";
 
 // Cart functionality
 let cart = [];
@@ -666,3 +666,4 @@ searchBtn.addEventListener('click', searchProducts);
 searchInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') searchProducts();
 });
+
