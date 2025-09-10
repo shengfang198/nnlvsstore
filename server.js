@@ -81,7 +81,7 @@ app.get('/auth/google/callback', async (req, res) => {
     const jwtToken = jwt.sign({ email, name }, JWT_SECRET, { expiresIn: '1d' });
 
     // Redirect to myecommerce.html inside public/myecommerce/
-    res.redirect(`/myecommerce/myecommerce.html?token=${jwtToken}`);
+    res.redirect(`/myecommerce.html?token=${jwtToken}`);
   } catch (err) {
     console.error('Google auth error:', err);
     res.status(401).json({ error: 'Authentication failed' });
@@ -167,3 +167,4 @@ app.delete('/cart', authMiddleware, (req, res) => {
 // ========================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+
