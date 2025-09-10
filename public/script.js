@@ -27,7 +27,7 @@ const logoutBtn = document.getElementById('logout-btn');
 
 // ===== OAuth Buttons =====
 document.getElementById('google-login').addEventListener('click', () => {
-    window.location.href = 'http://localhost:3000/auth/google';
+    window.location.href = 'https://nnlvsstore.onrender.com/auth/google';
 });
 
 // document.getElementById('facebook-login').addEventListener('click', () => {
@@ -64,7 +64,7 @@ loginSubmit.addEventListener('click', async () => {
     }
 
     try {
-        const res = await fetch('http://localhost:3000/auth/login', {
+        const res = await fetch('https://nnlvsstore.onrender.com/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -121,7 +121,7 @@ signupSubmit.addEventListener('click', async () => {
     }
 
     try {
-        const res = await fetch('http://localhost:3000/auth/signup', {
+        const res = await fetch('https://nnlvsstore.onrender.com/auth/signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -666,5 +666,6 @@ searchBtn.addEventListener('click', searchProducts);
 searchInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') searchProducts();
 });
+
 
 
