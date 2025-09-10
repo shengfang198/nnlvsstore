@@ -39,10 +39,15 @@ googleLoginBtn.addEventListener('click', () => {
 });
 
 async function handleGoogleCredentialResponse(response) {
-    // The token from Google
-    const googleIdToken = response.credential;
-
     try {
+        // Extract the Google ID token
+        const googleIdToken = response.credential;
+        if (!googleIdToken) {
+            showNotification('Google token missing', 'error');
+            return;
+        }
+
+        // Send the token to your server
         const res = await fetch('https://nnlvsstore.onrender.com/auth/google', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -52,20 +57,27 @@ async function handleGoogleCredentialResponse(response) {
         const data = await res.json();
         console.log('Server Response:', data);
 
-        if (res.ok) {
+        if (res.ok && data.token) {
+            // Save the JWT locally
             localStorage.setItem('token', data.token);
+
+            // Update UI
             showNotification(`Logged in as ${data.user.name}`, 'success');
             loginBtn.innerHTML = `<i class="far fa-user-circle"></i><span>${data.user.name.split(' ')[0]}</span>`;
             loginModal.classList.add('hidden');
             document.body.style.overflow = '';
+
+            // Redirect to ecommerce page
+            window.location.href = 'myecommerce.html';
         } else {
             showNotification(data.error || 'Google login failed', 'error');
         }
     } catch (err) {
-        console.error(err);
+        console.error('Google login error:', err);
         showNotification('Server error', 'error');
     }
 }
+
 // ===== Modal Open/Close =====
 loginBtn.addEventListener('click', () => {
     loginModal.classList.remove('hidden');
@@ -698,6 +710,7 @@ searchBtn.addEventListener('click', searchProducts);
 searchInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') searchProducts();
 });
+
 
 
 
