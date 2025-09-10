@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NINELIVES</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f8fafc;
+        color: #1e293b;
+        scroll-behavior: smooth;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    /* Header */
+    .header {
+        box-shadow: 0 4px 12px 0 rgba(0, 0, 0, .05);
+        border-bottom: 1px solid #e2e8f0;
+        background: white;
+    }
+
+    /* Search bar */
+    .search-bar {
+        box-shadow: 0 2px 8px 0 rgba(0, 0, 0, .05);
+        border-radius: 8px;
+        transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
+    }
+
+    .search-bar:focus-within {
+        box-shadow: 0 4px 16px 0 rgba(0, 0, 0, .1);
+    }
+
+    /* Category nav */
+    .category-item {
+        transition: all 0.3s ease;
+        color: #64748b;
+    }
+
+    .category-item:hover {
+        color: #3b82f6;
+        transform: translateY(-2px);
+    }
+
+    .category-item.active {
+        color: #3b82f6;
+        position: relative;
+    }
+
+    .category-item.active::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #3b82f6;
+    }
+
+    /* Product cards */
+    .product-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e2e8f0;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+
+    }
+
+    .product-img {
+        height: 180px;
+        object-fit: contain;
+        transition: transform 0.3s ease;
+    }
+
+    .product-card:hover .product-img {
+        transform: scale(1.05);
+    }
+
+    .discount-badge {
+        background: linear-gradient(to right, #10b981, #34d399);
+        color: white;
+        border-radius: 4px;
+        padding: 2px 6px;
+        font-size: 11px;
+        font-weight: 500;
+    }
+
+    .add-to-cart {
+        background: linear-gradient(to right, #2d2d2e, #c7cfda);
+        color: white;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .add-to-cart:hover {
+        background: linear-gradient(to right, #494949, #dddbdb);
+        transform: translateY(-1px);
+    }
+
+    /* Hero banner */
+    .hero-banner {
+        height: 900px;
+        background-image: url('WOLF.jpg');
+        background-size: cover;
+        background-position: center;
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(45deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.3));
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideRight {
+        from {
+            transform: translateX(-20px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .animate-fadeIn {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    .animate-slideRight {
+        animation: slideRight 0.6s ease-out forwards;
+    }
+
+    /* Modal */
+    .modal {
+        backdrop-filter: blur(5px);
+    }
+
+    /* Notification */
+    .notification {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeIn 0.3s ease-out forwards;
+    }
+
+    /* Cart sidebar */
+    .cart-sidebar {
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Discount banner */
+    .discount-banner {
+        transition: transform 0.3s ease;
+    }
+
+    .discount-banner:hover {
+        transform: translateY(-3px);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .hero-banner {
+            height: 200px;
+        }
+
+        .product-img {
+            height: 120px;
+        }
+    }
+
+    .disabled {
+        pointer-events: none;
+        /* Disable clicking */
+        opacity: 0.5;
+        /* Dim the content */
+        user-select: none;
+        /* Disable text
+             selection */
+    }
+</style>
+</head>
+
+<body class="bg-gray-50">
+
+
+    <!-- All your site HTML goes here -->
+    <!-- Notification Area -->
+    <div id="notification-area" class="fixed top-4 right-4 z-50 space-y-2 w-full max-w-xs"></div>
+    <!-- <div class="cursor-dot fixed w-4 h-4 bg-gray-500 rounded-full pointer-events-none z-50"></div>
+    <div class="cursor-circle fixed w-8 h-8 border-2 border-black-500 rounded-full pointer-events-none z-40"></div> -->
+
+    <!-- Header -->
+    <header class="header sticky top-0 z-40">
+        <div class="container mx-auto px-4 ">
+            <!-- Top Bar -->
+            <div class="flex items-center justify-between py-3 md:py-0">
+                <!-- Logo -->
+                <a href="#" class="flex items-center">
+                    <h1 class="text-2xl font-bold text-Black-200 flex items-center">
+                        <span class="mr-1">NINELIVES</span>
+                        <span class="text-xs text-gray-400 font-normal">clo</span>
+                    </h1>
+                </a>
+
+
+
+                <!-- User Actions -->
+                <div class="flex items-center space-x-3 md:space-x-6">
+                    <button id="login-btn"
+                        class="md:flex items-center space-x-1 px-3 py-2 text-gray-700 hover:text-blue-600">
+                        <i class="far fa-user"></i>
+                        <span>Login</span>
+                    </button>
+
+
+                    <a href="#" id="cart-button" class="hidden">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span id="cart-count">0</span>
+                        <span>Cart</span>
+                    </a>
+
+                </div>
+            </div>
+
+
+
+    </header>
+
+
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- Hero Banner -->
+        <section class="hero-banner mb-8 rounded-xl overflow-hidden animate-slideRight">
+            <div class="hero-overlay flex items-center">
+                <div class="px-8 text-white">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-2">Creativity without limits.</h2>
+                    <p class="text-lg md:text-xl mb-6 max-w-lg">NineLives BerMonths Sale 2025
+                    </p>
+                    <!-- <button class="bg-white text-blue-600 px-6 py-3 rounded-xl font-bold hover:bg-gray-100 transition">
+                        Shop Collection <i class="fas fa-arrow-right ml-2"></i>
+                    </button> -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300">
+        <div class="container mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- About -->
+                <div>
+                    <h3 class="text-white text-lg font-bold mb-4">ABOUT</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-white transition">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-white transition">About Us</a></li>
+                        <li><a href="#" class="hover:text-white transition">Careers</a></li>
+                    </ul>
+                </div>
+
+                <!-- Help -->
+                <!-- <div>
+                    <h3 class="text-white text-lg font-bold mb-4">HELP</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-white transition">Payments</a></li>
+                        <li><a href="#" class="hover:text-white transition">Shipping</a></li>
+                        <li><a href="#" class="hover:text-white transition">Cancellation & Returns</a></li>
+                        <li><a href="#" class="hover:text-white transition">FAQ</a></li>
+                        <li><a href="#" class="hover:text-white transition">Report Infringement</a></li>
+                    </ul>
+                </div> -->
+
+                <!-- Policy -->
+                <!-- <div>
+                    <h3 class="text-white text-lg font-bold mb-4">POLICY</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-white transition">Return Policy</a></li>
+                        <li><a href="#" class="hover:text-white transition">Terms Of Use</a></li>
+                        <li><a href="#" class="hover:text-white transition">Security</a></li>
+                        <li><a href="#" class="hover:text-white transition">Privacy</a></li>
+                        <li><a href="#" class="hover:text-white transition">Sitemap</a></li>
+                    </ul>
+                </div> -->
+
+                <!-- Social -->
+                <div>
+                    <h3 class="text-white text-lg font-bold mb-4">SOCIAL</h3>
+                    <div class="flex space-x-4">
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-600 transition">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-400 transition">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-red-600 transition">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-pink-600 transition">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+
+                    <!-- <h4 class="text-white text-lg font-bold mt-6 mb-3">Download App</h4>
+                    <div class="flex space-x-2">
+                        <a href="#" class="w-32 h-10 rounded bg-gray-800 hover:bg-gray-700 transition"></a>
+                        <a href="#" class="w-32 h-10 rounded bg-gray-800 hover:bg-gray-700 transition"></a>
+                    </div> -->
+                </div>
+            </div>
+
+            <!-- <div class="border-t border-gray-800 mt-8 pt-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-briefcase mr-3 text-gray-400"></i>
+                        <span class="hover:text-white cursor-pointer transition">Become a Seller</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-star mr-3 text-gray-400"></i>
+                        <span class="hover:text-white cursor-pointer transition">Advertise</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-gift mr-3 text-gray-400"></i>
+                        <span class="hover:text-white cursor-pointer transition">Gift Cards</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-question-circle mr-3 text-gray-400"></i>
+                        <span class="hover:text-white cursor-pointer transition">Help Center</span>
+                    </div>
+                </div>
+            </div> -->
+        </div>
+
+        <div class="bg-gray-800 py-4">
+            <div class="container mx-auto px-4 text-center text-gray-400 text-sm">
+                © 2023 NineLives. All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <!-- Auth Modal -->
+    <div id="login-modal" class="fixed inset-0 z-50 hidden modal">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md relative">
+
+                <!-- Close button -->
+                <div class="absolute top-4 right-4">
+                    <button id="close-login" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="p-8">
+                    <!-- LOGIN FORM -->
+                    <div id="login-form">
+                        <h2 class="text-3xl font-bold text-center mb-8">Welcome</h2>
+
+                        <div class="mb-6">
+                            <input
+                                class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                id="login-email" type="text" placeholder="Email or mobile number">
+                        </div>
+
+                        <div class="mb-6">
+                            <input
+                                class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                id="login-password" type="password" placeholder="Password">
+                        </div>
+
+                        <button id="login-submit"
+                            class="w-full bg-gray-700 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition mb-4">
+                            Login
+                        </button>
+
+                        <div class="text-center">
+                            <a href="#" class="text-blue-600 text-sm hover:underline">Forgot Password?</a>
+                        </div>
+
+                        <div class="flex items-center my-6">
+                            <div class="flex-1 border-t border-gray-200"></div>
+                            <span class="px-3 text-gray-400">or</span>
+                            <div class="flex-1 border-t border-gray-200"></div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <button id="google-login"
+                                class="w-full flex items-center justify-center space-x-2 py-2.5 px-4 rounded-lg border border-gray-200 hover:bg-gray-50">
+                                <img src="googlelogo.png" alt="Google" class="w-6 h-6">
+                                <span>Continue with Google</span>
+                            </button>
+                            <button id="facebook-login"
+                                class="hidden w-full flex items-center justify-center space-x-2 py-2.5 px-4 rounded-lg border border-gray-200 hover:bg-gray-50">
+                                <i class="fab fa-facebook text-blue-600"></i>
+                                <span>Continue with Fac ebook</span>
+                            </button>
+                        </div>
+
+                        <p class="text-center text-gray-500 mt-6">
+                            New to NineLives? <a href="#" id="show-signup" class="text-blue-600 hover:underline">Create
+                                an account</a>
+                        </p>
+                    </div>
+
+                    <!-- SIGNUP FORM (hidden by default) -->
+                    <div id="signup-form" class="hidden">
+                        <h2 class="text-3xl font-bold text-center mb-8">Create an Account</h2>
+
+                        <div class="mb-6">
+                            <input
+                                class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                id="signup-email" type="text" placeholder="Email or mobile number">
+                        </div>
+
+                        <div class="mb-6">
+                            <input
+                                class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                id="signup-password" type="password" placeholder="Password">
+                        </div>
+
+                        <div class="mb-6">
+                            <input
+                                class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                id="signup-confirm-password" type="password" placeholder="Confirm Password">
+                        </div>
+
+                        <button id="signup-submit"
+                            class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition mb-4">
+                            Sign Up
+                        </button>
+
+                        <p class="text-center text-gray-500 mt-6">
+                            Already have an account? <a href="#" id="show-login"
+                                class="text-blue-600 hover:underline">Login here</a>
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Size Selection Modal -->
+    <div id="sizeModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+        <div class="bg-white p-5 rounded-lg shadow-lg w-80 text-center">
+            <p class="text-lg font-semibold mb-4">Please select a size</p>
+            <button id="closeSizeModal" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                Close
+            </button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+
+
+</html>

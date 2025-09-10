@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NINELIVES</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            scroll-behavior: smooth;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Header */
+        .header {
+            box-shadow: 0 4px 12px 0 rgba(0, 0, 0, .05);
+            border-bottom: 1px solid #e2e8f0;
+            background: white;
+        }
+
+        /* Search bar */
+        .search-bar {
+            box-shadow: 0 2px 8px 0 rgba(0, 0, 0, .05);
+            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
+        }
+
+        .search-bar:focus-within {
+            box-shadow: 0 4px 16px 0 rgba(0, 0, 0, .1);
+        }
+
+        /* Category nav */
+        .category-item {
+            transition: all 0.3s ease;
+            color: #64748b;
+        }
+
+        .category-item:hover {
+            color: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        .category-item.active {
+            color: #3b82f6;
+            position: relative;
+        }
+
+        .category-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #3b82f6;
+        }
+
+        /* Product cards */
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+
+        }
+
+        .product-img {
+            height: 180px;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover .product-img {
+            transform: scale(1.05);
+        }
+
+        .discount-badge {
+            background: linear-gradient(to right, #10b981, #34d399);
+            color: white;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .add-to-cart {
+            background: linear-gradient(to right, #2d2d2e, #0f0f0f);
+            color: white;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .add-to-cart:hover {
+            background: linear-gradient(to right, #2b2b2b, #272727);
+            transform: translateY(-1px);
+        }
+
+        /* Hero banner */
+        .hero-banner {
+            height: 500px;
+            background-image: url('nnlvs.jpg');
+            background-size: cover;
+            background-position: center;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+         /* Hero banner */
+        .hero-bannerfooter {
+            height: 500px;
+            background-image: url('Samuraipng.png');
+            background-size: cover;
+            background-position: center;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.3));
+        }
+         .hero-overlayfooter {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.3));
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideRight {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .animate-slideRight {
+            animation: slideRight 0.6s ease-out forwards;
+        }
+
+        /* Modal */
+        .modal {
+            backdrop-filter: blur(5px);
+        }
+
+        /* Notification */
+        .notification {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        /* Cart sidebar */
+        .cart-sidebar {
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Discount banner */
+        .discount-banner {
+            transition: transform 0.3s ease;
+        }
+
+        .discount-banner:hover {
+            transform: translateY(-3px);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .hero-banner {
+                height: 200px;
+            }
+
+            .product-img {
+                height: 120px;
+            }
+            .hero-bannerfooter {
+                height: 200px;
+            }
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(100%);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        .animate-marquee {
+            display: inline-flex;
+            white-space: nowrap;
+            animation: marquee 17s linear infinite;
+        }
+    </style>
+</head>
+
+<body class="relative min-h-screen overflow-x-hidden">
+
+    <!-- Notification Area -->
+    <div id="notification-area" class="fixed top-4 right-4 z-50 space-y-2 w-full max-w-xs"></div>
+    <!-- <div class="cursor-dot fixed w-4 h-4 bg-gray-500 rounded-full pointer-events-none z-50"></div>
+    <div class="cursor-circle fixed w-8 h-8 border-2 border-black-500 rounded-full pointer-events-none z-40"></div> -->
+
+    <!-- Header -->
+    <header class="header sticky top-0 z-40">
+        <div class="container mx-auto px-4">
+            <!-- Top Bar -->
+            <div class="flex items-center justify-between py-3 md:py-0 h-20">
+                <!-- Logo -->
+                <a href="#" class="flex items-center">
+                    <h1 class="text-2xl font-bold text-gray-950 flex items-center">
+                        <!-- Fix aspect ratio -->
+                        <img src="logo.png" alt="Logo"
+                            class="h-6 w-auto mr-2 transform transition duration-300 hover:scale-110" />
+                        <span class="mr-1">NINELIVES</span>
+                        <span class="text-xs text-gray-600 font-normal">clo</span>
+                    </h1>
+                </a>
+
+                <!-- Search Bar -->
+                <!-- <div class="hidden md:block mx-4 flex-1 max-w-2xl">
+                    <div class="search-bar flex items-center bg-gray-50 p-1.5 rounded-lg">
+                        <input type="text" placeholder="Search for products, brands and more..."
+                            class="w-full px-4 py-2 bg-transparent focus:outline-none text-gray-700">
+                        <button class="bg-gray-900 text-white p-2 rounded-lg hover:bg-gray-700 transition">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div> -->
+
+                <!-- User Actions -->
+                <div class="flex items-center space-x-3 md:space-x-6">
+                    <i class="far fa-user"></i>
+                    <button id="login-btn" class="hidden">
+
+
+                    </button>
+
+                    <!-- <div class="flex items-center space-x-3 md:space-x-6">
+                    <button id="login-btn" class="hidden">
+                        <i class="far fa-user"></i>
+                        <span>Login</span>
+                    </button> -->
+
+                    <div class="relative group">
+                        <!-- <button
+                            class="hidden md:flex items-center space-x-1 px-3 py-2 text-gray-700 hover:text-blue-600">
+                            <span>More</span>
+                            <i class="fas fa-chevron-down text-xs mt-0.5"></i>
+                        </button> -->
+
+                        <div
+                            class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg hidden group-hover:block z-50 border border-gray-100 animate-fadeIn">
+                            <div class="py-1">
+                                <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                    <i class="far fa-bell mr-2"></i> Notifications
+                                </a>
+                                <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                    <i class="far fa-question-circle mr-2"></i> Customer Care
+                                </a>
+                                <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                    <i class="fas fa-ad mr-2"></i> Advertise
+                                </a>
+                                <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                    <i class="fas fa-mobile-alt mr-2"></i> Download App
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Somewhere in your header/nav -->
+                    <button id="logout-btn" class="ml-4 text-gray-900 px-3 py-1 rounded-full hover:text-gray-600">
+                        Logout
+                    </button>
+
+                    <a href="#" id="cart-button"
+                        class="flex items-center space-x-1 px-3 py-2 relative text-gray-900 hover:text-gray-600">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span id="cart-count"
+                            class="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">0</span>
+                        <span class="hidden md:inline">Cart</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mobile Search -->
+            <div class="md:hidden pb-3">
+                <div class="search-bar flex items-center bg-gray-50 p-1.5 rounded-lg">
+                    <input type="text" placeholder="Search for products..."
+                        class="w-full px-4 py-2 bg-transparent focus:outline-none text-gray-700">
+                    <button class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categories Navigation -->
+        <!-- <nav class="bg-white border-t border-gray-100 hidden md:block">
+            <div class="container mx-auto px-4 overflow-x-auto">
+                <div class="flex space-x-8 py-3 whitespace-nowrap">
+                    <a href="#" class="category-item text-sm font-medium flex flex-col items-center">
+                        <div class="w-10 h-10 rounded-full bg-gray-100 mb-1 flex items-center justify-center">
+                            <i class="fas fa-home text-gray-800"></i>
+                        </div>
+
+                    </a>
+
+                </div>
+            </div>
+        </nav> -->
+
+        <!-- Sliding Ads Row -->
+        <div class="w-full bg-black py-3 overflow-hidden relative -mt-2 mb-6">
+            <div class="flex animate-marquee whitespace-nowrap">
+                <span class="text-white text-base font-semibold mx-12">NINELIVES</span>
+                <span class="text-white text-base font-semibold mx-12">NINELIVES</span>
+                <span class="text-white text-base font-semibold mx-12">NINELIVES</span>
+                <span class="text-white text-base font-semibold mx-12">NINELIVES</span>
+
+                <!-- Duplicate for smooth loop -->
+                <span class="text-white text-base font-semibold mx-12">NINELIVES</span>
+                <span class="text-white text-base font-semibold mx-12">NINELIVES</span>
+                <span class="text-white text-base font-semibold mx-12">NINELIVES</span>
+                <span class="text-white text-base font-semibold mx-12">NINELIVES</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+
+
+        <!-- Hero Banner -->
+        <section class="hero-banner mb-8 rounded-xl overflow-hidden animate-slideRight">
+            <div class="hero-overlay flex items-center">
+                <div class="px-8 text-white">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-2">Summer Sale 2025</h2>
+                    <p class="text-lg md:text-xl mb-6 max-w-lg">Up to 70% off on all fashion items. Limited time only!
+                    </p>
+                    <!-- <button class="bg-white text-blue-600 px-6 py-3 rounded-xl font-bold hover:bg-gray-100 transition">
+                        Shop Collection <i class="fas fa-arrow-right ml-2"></i>
+                    </button> -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Deals Section -->
+        <section class="mb-10 animate-fadeIn" style="animation-delay: 0.2s">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Collections</h2>
+                <!-- <a href="#" class="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center">
+                    View All <i class="fas fa-chevron-right text-xs ml-1"></i>
+                </a> -->
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 p-4">
+
+
+                <!-- Product Card 1-->
+                <div
+                    class="product-card transform transition flex flex-col px-6 py-4 bg-white rounded shadow-md h-full">
+                    <!-- Image / TiltBox -->
+                    <div class="tiltBox p-4 rounded-lg shadow-lg flex-1 flex items-center justify-center relative">
+                        <img src="Astro.jpg" alt="Shirt 1"
+                            class="product-img mx-auto max-w-3/4 max-h-3/4 object-contain">
+                    </div>
+
+                    <!-- Details + Buttons -->
+                    <div class="flex flex-col mt-4 flex-grow justify-end">
+                        <h3 class="text-md font-semibold text-gray-800 line-clamp-2 text-center">Shirt 1</h3>
+
+                        <div class="flex items-center justify-center mt-2 space-x-2">
+                            <span class="text-lg font-bold">₱599</span>
+                        </div>
+
+                        <!-- View Details Button -->
+                        <div class="flex justify-center mt-2">
+                            <button
+                                class="view-details-btn text-gray-700 hover:text-gray-400 text-sm px-1 py-1 rounded mt-1 self-start transition"
+                                data-id="shirt01">
+                                View Details
+                            </button>
+                        </div>
+
+                        <!-- Size Buttons -->
+                        <div class="mt-4 flex justify-center space-x-3">
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Small">S</button>
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Medium">M</button>
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Large">L</button>
+                        </div>
+
+                        <!-- Add to Cart Button -->
+                        <div class="mt-4">
+                            <button
+                                class="add-to-cart mt-auto w-full py-2.5 text-sm flex items-center justify-center space-x-2 bg-gray-600 text-white rounded hover:bg-blue-100 transition"
+                                data-id="1" data-name="Shirt 1" data-price="599" data-size="">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Add to Cart</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 2-->
+                <div
+                    class="product-card transform transition flex flex-col px-6 py-4 bg-white rounded shadow-md h-full">
+                    <!-- Image / TiltBox -->
+                    <div class="tiltBox p-4 rounded-lg shadow-lg flex-1 flex items-center justify-center relative">
+                        <img src="sample.png" alt="Shirt 2"
+                            class="product-img mx-auto max-w-3/4 max-h-3/4 object-contain">
+                    </div>
+
+                    <!-- Details + Buttons -->
+                    <div class="flex flex-col mt-4 flex-grow justify-end">
+                        <h3 class="text-md font-semibold text-gray-800 line-clamp-2 text-center">Shirt 2</h3>
+
+                        <div class="flex items-center justify-center mt-2 space-x-2">
+                            <span class="text-lg font-bold">₱599</span>
+                        </div>
+
+                        <!-- View Details Button -->
+                        <div class="flex justify-center mt-2">
+                            <button
+                                class="view-details-btn text-gray-700 hover:text-gray-400 text-sm px-1 py-1 rounded mt-1 self-start transition"
+                                data-id="shirt02">
+                                View Details
+                            </button>
+                        </div>
+
+                        <!-- Size Buttons -->
+                        <div class="mt-4 flex justify-center space-x-3">
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Small">S</button>
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Medium">M</button>
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Large">L</button>
+                        </div>
+
+                        <!-- Add to Cart Button -->
+                        <div class="mt-4">
+                            <button
+                                class="add-to-cart mt-auto w-full py-2.5 text-sm flex items-center justify-center space-x-2 bg-gray-600 text-white rounded hover:bg-blue-100 transition"
+                                data-id="2" data-name="Shirt 2" data-price="599" data-size="">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Add to Cart</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 3-->
+                <div
+                    class="product-card transform transition flex flex-col px-6 py-4 bg-white rounded shadow-md h-full">
+                    <!-- Image / TiltBox -->
+                    <div class="tiltBox p-4 rounded-lg shadow-lg flex-1 flex items-center justify-center relative">
+                        <img src="black.png" alt="Shirt 3"
+                            class="product-img mx-auto max-w-3/4 max-h-3/4 object-contain">
+                    </div>
+
+                    <!-- Details + Buttons -->
+                    <div class="flex flex-col mt-4 flex-grow justify-end">
+                        <h3 class="text-md font-semibold text-gray-800 line-clamp-2 text-center">Shirt 3</h3>
+
+                        <div class="flex items-center justify-center mt-2 space-x-2">
+                            <span class="text-lg font-bold">₱599</span>
+                        </div>
+
+                        <!-- View Details Button -->
+                        <div class="flex justify-center mt-2">
+                            <button
+                                class="view-details-btn text-gray-700 hover:text-gray-400 text-sm px-1 py-1 rounded mt-1 self-start transition"
+                                data-id="shirt03">
+                                View Details
+                            </button>
+                        </div>
+
+                        <!-- Size Buttons -->
+                        <div class="mt-4 flex justify-center space-x-3">
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Small">S</button>
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Medium">M</button>
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Large">L</button>
+                        </div>
+
+                        <!-- Add to Cart Button -->
+                        <div class="mt-4">
+                            <button
+                                class="add-to-cart mt-auto w-full py-2.5 text-sm flex items-center justify-center space-x-2 bg-gray-600 text-white rounded hover:bg-blue-100 transition"
+                                data-id="3" data-name="Shirt 3" data-price="599" data-size="">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Add to Cart</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 4-->
+                <div
+                    class="product-card transform transition flex flex-col px-6 py-4 bg-white rounded shadow-md h-full">
+                    <!-- Image / TiltBox -->
+                    <div class="tiltBox p-4 rounded-lg shadow-lg flex-1 flex items-center justify-center relative">
+                        <img src="black.png" alt="Shirt 4"
+                            class="product-img mx-auto max-w-3/4 max-h-3/4 object-contain">
+                    </div>
+
+                    <!-- Details + Buttons -->
+                    <div class="flex flex-col mt-4 flex-grow justify-end">
+                        <h3 class="text-md font-semibold text-gray-800 line-clamp-2 text-center">Shirt 4</h3>
+
+                        <div class="flex items-center justify-center mt-2 space-x-2">
+                            <span class="text-lg font-bold">₱599</span>
+                        </div>
+
+                        <!-- View Details Button -->
+                        <div class="flex justify-center mt-2">
+                            <button
+                                class="view-details-btn text-gray-700 hover:text-gray-400 text-sm px-1 py-1 rounded mt-1 self-start transition"
+                                data-id="shirt04">
+                                View Details
+                            </button>
+                        </div>
+
+                        <!-- Size Buttons -->
+                        <div class="mt-4 flex justify-center space-x-3">
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Small">S</button>
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Medium">M</button>
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Large">L</button>
+                        </div>
+
+                        <!-- Add to Cart Button -->
+                        <div class="mt-4">
+                            <button
+                                class="add-to-cart mt-auto w-full py-2.5 text-sm flex items-center justify-center space-x-2 bg-gray-600 text-white rounded hover:bg-blue-100 transition"
+                                data-id="4" data-name="Shirt 4" data-price="599" data-size="">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Add to Cart</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Product Card 5-->
+                <div
+                    class="product-card transform transition flex flex-col px-6 py-4 bg-white rounded shadow-md h-full">
+                    <!-- Image / TiltBox -->
+                    <div class="tiltBox p-4 rounded-lg shadow-lg flex-1 flex items-center justify-center relative">
+                        <img src="black.png" alt="Shirt 5"
+                            class="product-img mx-auto max-w-3/4 max-h-3/4 object-contain">
+                    </div>
+
+                    <!-- Details + Buttons -->
+                    <div class="flex flex-col mt-4 flex-grow justify-end">
+                        <h3 class="text-md font-semibold text-gray-800 line-clamp-2 text-center">Shirt 5</h3>
+
+                        <div class="flex items-center justify-center mt-2 space-x-2">
+                            <span class="text-lg font-bold">₱599</span>
+                        </div>
+
+                        <!-- View Details Button -->
+                        <div class="flex justify-center mt-2">
+                            <button
+                                class="view-details-btn text-gray-700 hover:text-gray-400 text-sm px-1 py-1 rounded mt-1 self-start transition"
+                                data-id="shirt05">
+                                View Details
+                            </button>
+                        </div>
+
+                        <!-- Size Buttons -->
+                        <div class="mt-4 flex justify-center space-x-3">
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Small">S</button>
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Medium">M</button>
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Large">L</button>
+                        </div>
+
+                        <!-- Add to Cart Button -->
+                        <div class="mt-4">
+                            <button
+                                class="add-to-cart mt-auto w-full py-2.5 text-sm flex items-center justify-center space-x-2 bg-gray-600 text-white rounded hover:bg-blue-100 transition"
+                                data-id="5" data-name="Shirt 5" data-price="599" data-size="">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Add to Cart</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 6-->
+                <div
+                    class="product-card transform transition flex flex-col px-6 py-4 bg-white rounded shadow-md h-full">
+                    <!-- Image / TiltBox -->
+                    <div class="tiltBox p-4 rounded-lg shadow-lg flex-1 flex items-center justify-center relative">
+                        <img src="sample.png" alt="Shirt 6"
+                            class="product-img mx-auto max-w-3/4 max-h-3/4 object-contain">
+                    </div>
+
+                    <!-- Details + Buttons -->
+                    <div class="flex flex-col mt-4 flex-grow justify-end">
+                        <h3 class="text-md font-semibold text-gray-800 line-clamp-2 text-center">Shirt 6</h3>
+
+                        <div class="flex items-center justify-center mt-2 space-x-2">
+                            <span class="text-lg font-bold">₱599</span>
+                        </div>
+
+                        <!-- View Details Button -->
+                        <div class="flex justify-center mt-2">
+                            <button
+                                class="view-details-btn text-gray-700 hover:text-gray-400 text-sm px-1 py-1 rounded mt-1 self-start transition"
+                                data-id="shirt06">
+                                View Details
+                            </button>
+                        </div>
+
+                        <!-- Size Buttons -->
+                        <div class="mt-4 flex justify-center space-x-3">
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Small">S</button>
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Medium">M</button>
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Large">L</button>
+                        </div>
+
+                        <!-- Add to Cart Button -->
+                        <div class="mt-4">
+                            <button
+                                class="add-to-cart mt-auto w-full py-2.5 text-sm flex items-center justify-center space-x-2 bg-gray-600 text-white rounded hover:bg-blue-100 transition"
+                                data-id="6" data-name="Shirt 6" data-price="599" data-size="">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Add to Cart</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 7-->
+                <div
+                    class="product-card transform transition flex flex-col px-6 py-4 bg-white rounded shadow-md h-full">
+                    <!-- Image / TiltBox -->
+                    <div class="tiltBox p-4 rounded-lg shadow-lg flex-1 flex items-center justify-center relative">
+                        <img src="black.png" alt="Shirt 7"
+                            class="product-img mx-auto max-w-3/4 max-h-3/4 object-contain">
+                    </div>
+
+                    <!-- Details + Buttons -->
+                    <div class="flex flex-col mt-4 flex-grow justify-end">
+                        <h3 class="text-md font-semibold text-gray-800 line-clamp-2 text-center">Shirt 7</h3>
+
+                        <div class="flex items-center justify-center mt-2 space-x-2">
+                            <span class="text-lg font-bold">₱599</span>
+                        </div>
+
+                        <!-- View Details Button -->
+                        <div class="flex justify-center mt-2">
+                            <button
+                                class="view-details-btn text-gray-700 hover:text-gray-400 text-sm px-1 py-1 rounded mt-1 self-start transition"
+                                data-id="shirt07">
+                                View Details
+                            </button>
+                        </div>
+
+                        <!-- Size Buttons -->
+                        <div class="mt-4 flex justify-center space-x-3">
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Small">S</button>
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Medium">M</button>
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Large">L</button>
+                        </div>
+
+                        <!-- Add to Cart Button -->
+                        <div class="mt-4">
+                            <button
+                                class="add-to-cart mt-auto w-full py-2.5 text-sm flex items-center justify-center space-x-2 bg-gray-600 text-white rounded hover:bg-blue-100 transition"
+                                data-id="7" data-name="Shirt 7" data-price="599" data-size="">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Add to Cart</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 8-->
+                <div
+                    class="product-card transform transition flex flex-col px-6 py-4 bg-white rounded shadow-md h-full">
+                    <!-- Image / TiltBox -->
+                    <div class="tiltBox p-4 rounded-lg shadow-lg flex-1 flex items-center justify-center relative">
+                        <img src="sample.png" alt="Shirt 8"
+                            class="product-img mx-auto max-w-3/4 max-h-3/4 object-contain">
+                    </div>
+
+                    <!-- Details + Buttons -->
+                    <div class="flex flex-col mt-4 flex-grow justify-end">
+                        <h3 class="text-md font-semibold text-gray-800 line-clamp-2 text-center">Shirt 8</h3>
+
+                        <div class="flex items-center justify-center mt-2 space-x-2">
+                            <span class="text-lg font-bold">₱599</span>
+                        </div>
+
+                        <!-- View Details Button -->
+                        <div class="flex justify-center mt-2">
+                            <button
+                                class="view-details-btn text-gray-700 hover:text-gray-400 text-sm px-1 py-1 rounded mt-1 self-start transition"
+                                data-id="shirt08">
+                                View Details
+                            </button>
+                        </div>
+
+                        <!-- Size Buttons -->
+                        <div class="mt-4 flex justify-center space-x-3">
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Small">S</button>
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Medium">M</button>
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Large">L</button>
+                        </div>
+
+                        <!-- Add to Cart Button -->
+                        <div class="mt-4">
+                            <button
+                                class="add-to-cart mt-auto w-full py-2.5 text-sm flex items-center justify-center space-x-2 bg-gray-600 text-white rounded hover:bg-blue-100 transition"
+                                data-id="8" data-name="Shirt 8" data-price="599" data-size="">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Add to Cart</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 9-->
+                <div
+                    class="product-card transform transition flex flex-col px-6 py-4 bg-white rounded shadow-md h-full">
+                    <!-- Image / TiltBox -->
+                    <div class="tiltBox p-4 rounded-lg shadow-lg flex-1 flex items-center justify-center relative">
+                        <img src="black.png" alt="Shirt 9"
+                            class="product-img mx-auto max-w-3/4 max-h-3/4 object-contain">
+                    </div>
+
+                    <!-- Details + Buttons -->
+                    <div class="flex flex-col mt-4 flex-grow justify-end">
+                        <h3 class="text-md font-semibold text-gray-800 line-clamp-2 text-center">Shirt 9</h3>
+
+                        <div class="flex items-center justify-center mt-2 space-x-2">
+                            <span class="text-lg font-bold">₱599</span>
+                        </div>
+
+                        <!-- View Details Button -->
+                        <div class="flex justify-center mt-2">
+                            <button
+                                class="view-details-btn text-gray-700 hover:text-gray-400 text-sm px-1 py-1 rounded mt-1 self-start transition"
+                                data-id="shirt09">
+                                View Details
+                            </button>
+                        </div>
+
+                        <!-- Size Buttons -->
+                        <div class="mt-4 flex justify-center space-x-3">
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Small">S</button>
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Medium">M</button>
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Large">L</button>
+                        </div>
+
+                        <!-- Add to Cart Button -->
+                        <div class="mt-4">
+                            <button
+                                class="add-to-cart mt-auto w-full py-2.5 text-sm flex items-center justify-center space-x-2 bg-gray-600 text-white rounded hover:bg-blue-100 transition"
+                                data-id="9" data-name="Shirt 9" data-price="599" data-size="">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Add to Cart</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 10-->
+                <div
+                    class="product-card transform transition flex flex-col px-6 py-4 bg-white rounded shadow-md h-full">
+                    <!-- Image / TiltBox -->
+                    <div class="tiltBox p-4 rounded-lg shadow-lg flex-1 flex items-center justify-center relative">
+                        <img src="white.png" alt="Shirt 8"
+                            class="product-img mx-auto max-w-3/4 max-h-3/4 object-contain">
+                    </div>
+
+                    <!-- Details + Buttons -->
+                    <div class="flex flex-col mt-4 flex-grow justify-end">
+                        <h3 class="text-md font-semibold text-gray-800 line-clamp-2 text-center">Shirt 10</h3>
+
+                        <div class="flex items-center justify-center mt-2 space-x-2">
+                            <span class="text-lg font-bold">₱599</span>
+                        </div>
+
+                        <!-- View Details Button -->
+                        <div class="flex justify-center mt-2">
+                            <button
+                                class="view-details-btn text-gray-700 hover:text-gray-400 text-sm px-1 py-1 rounded mt-1 self-start transition"
+                                data-id="shirt10">
+                                View Details
+                            </button>
+                        </div>
+
+                        <!-- Size Buttons -->
+                        <div class="mt-4 flex justify-center space-x-3">
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Small">S</button>
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Medium">M</button>
+                            <button
+                                class="size cursor-pointer px-4 py-1 border border-gray-400 rounded text-sm hover:bg-gray-200"
+                                data-size="Large">L</button>
+                        </div>
+
+                        <!-- Add to Cart Button -->
+                        <div class="mt-4">
+                            <button
+                                class="add-to-cart mt-auto w-full py-2.5 text-sm flex items-center justify-center space-x-2 bg-gray-600 text-white rounded hover:bg-blue-100 transition"
+                                data-id="10" data-name="Shirt 10" data-price="599" data-size="">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Add to Cart</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between -mb-6 mt-10">
+                    <h2 class="text-2xl font-bold text-gray-900">Unleash Creativity</h2>
+                    <!-- <a href="#" class="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center">
+                    View All <i class="fas fa-chevron-right text-xs ml-1"></i>
+                </a> -->
+
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Modal -->
+        <div id="details-modal"
+            class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-50 px-4 transition-opacity duration-300">
+            <div
+                class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-auto relative p-8 transform transition-transform duration-300 scale-95">
+
+                <!-- Close Button -->
+                <button id="close-modal"
+                    class="absolute top-4 right-4 text-gray-500 hover:text-gray-900 text-3xl font-bold focus:outline-none transition-colors duration-300 hover:scale-110"
+                    aria-label="Close modal">&times;</button>
+
+                <!-- Title -->
+                <h2 id="modal-title" class="text-3xl font-bold mb-6 text-gray-800 transition-colors duration-300"></h2>
+
+                <!-- Main Image -->
+                <img id="modal-image" src="" alt=""
+                    class="w-full max-h-[70vh] object-contain rounded-xl mb-6 transition-transform duration-300 hover:scale-105" />
+
+                <!-- Thumbnails -->
+                <div id="modal-images"
+                    class="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+                    <img src="thumb1.png" alt="Thumbnail"
+                        class="w-20 h-20 object-cover rounded-lg cursor-pointer transition-transform duration-300 hover:scale-110 hover:shadow-lg" />
+                    <img src="thumb2.png" alt="Thumbnail"
+                        class="w-20 h-20 object-cover rounded-lg cursor-pointer transition-transform duration-300 hover:scale-110 hover:shadow-lg" />
+                    <img src="thumb3.png" alt="Thumbnail"
+                        class="w-20 h-20 object-cover rounded-lg cursor-pointer transition-transform duration-300 hover:scale-110 hover:shadow-lg" />
+                    <!-- More thumbnails can be injected -->
+                </div>
+            </div>
+        </div>
+
+        
+        <!-- Hero Banner -->
+        <!-- <section class="hero-bannerfooter mb-8 rounded-xl overflow-hidden animate-slideRight">
+            <div class="hero-overlayfooter flex items-center">
+                <div class="px-8 text-white">
+    
+                
+                </div>
+            </div>
+        </section> -->
+
+
+    </main>
+
+            <div class="flex animate-marquee whitespace-nowrap">
+                <span class="text-black text-base font-semibold mx-12">NINELIVESCLOTHING</span>
+                <span class="text-black text-base font-semibold mx-12">NINELIVESCLOTHING</span>
+                <span class="text-black text-base font-semibold mx-12">NINELIVESCLOTHING</span>
+                <span class="text-black text-base font-semibold mx-12">NINELIVESCLOTHING</span>
+
+                <!-- Duplicate for smooth loop -->
+                <span class="text-black text-base font-semibold mx-12">NINELIVESCLOTHING</span>
+                <span class="text-black text-base font-semibold mx-12">NINELIVESCLOTHING</span>
+                <span class="text-black text-base font-semibold mx-12">NINELIVESCLOTHING</span>
+                <span class="text-black text-base font-semibold mx-12">NINELIVESCLOTHING</span>
+            </div>
+        
+<!-- Banner Section -->
+<!-- <section class="w-full -mt-10 py-0 bg-[#f8fafc]">
+  <div class="w-full">
+    <img src="nnlvsbanner.png" 
+         alt="Banner Image" 
+         class="w-full max-h-[250px] object-contain mx-auto" />
+  </div>
+</section> -->
+
+<section class="w-full mt-0 py-0 bg-[#f8fafc]">
+  <div class="w-full">
+    <img src="samuraibanner.png" 
+         alt="Banner Image" 
+         class="w-full max-h-[800px] object-contain mx-auto mb-20 mt-10" />
+  </div>
+</section>
+    <!-- Footer -->
+
+    
+    <footer class="bg-gray-900 text-gray-300">
+        <div class="container mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- About -->
+                <div>
+                    <h3 class="text-white text-lg font-bold mb-4">ABOUT</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-white transition">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-white transition">About Us</a></li>
+                        <li><a href="#" class="hover:text-white transition">Careers</a></li>
+                    </ul>
+                </div>
+
+                <!-- Help -->
+                <!-- <div>
+                    <h3 class="text-white text-lg font-bold mb-4">HELP</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-white transition">Payments</a></li>
+                        <li><a href="#" class="hover:text-white transition">Shipping</a></li>
+                        <li><a href="#" class="hover:text-white transition">Cancellation & Returns</a></li>
+                        <li><a href="#" class="hover:text-white transition">FAQ</a></li>
+                        <li><a href="#" class="hover:text-white transition">Report Infringement</a></li>
+                    </ul>
+                </div> -->
+
+                <!-- Policy -->
+                <!-- <div>
+                    <h3 class="text-white text-lg font-bold mb-4">POLICY</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-white transition">Return Policy</a></li>
+                        <li><a href="#" class="hover:text-white transition">Terms Of Use</a></li>
+                        <li><a href="#" class="hover:text-white transition">Security</a></li>
+                        <li><a href="#" class="hover:text-white transition">Privacy</a></li>
+                        <li><a href="#" class="hover:text-white transition">Sitemap</a></li>
+                    </ul>
+                </div> -->
+
+                <!-- Social -->
+                <div>
+                    <h3 class="text-white text-lg font-bold mb-4">SOCIAL</h3>
+                    <div class="flex space-x-4">
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-600 transition">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-red-600 transition">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-pink-600 transition">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+
+                    <!-- <h4 class="text-white text-lg font-bold mt-6 mb-3">Download App</h4>
+                    <div class="flex space-x-2">
+                        <a href="#" class="w-32 h-10 rounded bg-gray-800 hover:bg-gray-700 transition"></a>
+                        <a href="#" class="w-32 h-10 rounded bg-gray-800 hover:bg-gray-700 transition"></a>
+                    </div> -->
+                </div>
+            </div>
+
+            <!-- <div class="border-t border-gray-800 mt-8 pt-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-briefcase mr-3 text-gray-400"></i>
+                        <span class="hover:text-white cursor-pointer transition">Become a Seller</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-star mr-3 text-gray-400"></i>
+                        <span class="hover:text-white cursor-pointer transition">Advertise</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-gift mr-3 text-gray-400"></i>
+                        <span class="hover:text-white cursor-pointer transition">Gift Cards</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-question-circle mr-3 text-gray-400"></i>
+                        <span class="hover:text-white cursor-pointer transition">Help Center</span>
+                    </div>
+                </div>
+            </div> -->
+        </div>
+
+        <div class="bg-gray-800 py-4">
+            <div class="container mx-auto px-4 text-center text-gray-400 text-sm">
+                © 2023 NineLives. All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <!-- Auth Modal -->
+    <div id="login-modal" class="fixed inset-0 z-50 hidden modal">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md relative">
+
+                <!-- Close button -->
+                <div class="absolute top-4 right-4">
+                    <button id="close-login" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="p-8">
+                    <!-- LOGIN FORM -->
+                    <div id="login-form">
+                        <h2 class="text-3xl font-bold text-center mb-8">Welcome Back</h2>
+
+                        <div class="mb-6">
+                            <input
+                                class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                id="login-email" type="text" placeholder="Email or mobile number">
+                        </div>
+
+                        <div class="mb-6">
+                            <input
+                                class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                id="login-password" type="password" placeholder="Password">
+                        </div>
+
+                        <button id="login-submit"
+                            class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition mb-4">
+                            Login
+                        </button>
+
+                        <div class="text-center">
+                            <a href="#" class="text-blue-600 text-sm hover:underline">Forgot Password?</a>
+                        </div>
+
+                        <div class="flex items-center my-6">
+                            <div class="flex-1 border-t border-gray-200"></div>
+                            <span class="px-3 text-gray-400">or</span>
+                            <div class="flex-1 border-t border-gray-200"></div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <button id="google-login"
+                                class="w-full flex items-center justify-center space-x-2 py-2.5 px-4 rounded-lg border border-gray-200 hover:bg-gray-50">
+                                <i class="fab fa-google text-blue-600"></i>
+                                <span>Continue with Google</span>
+                            </button>
+                            <button id="facebook-login"
+                                class="w-full flex items-center justify-center space-x-2 py-2.5 px-4 rounded-lg border border-gray-200 hover:bg-gray-50">
+                                <i class="fab fa-facebook text-blue-600"></i>
+                                <span>Continue with Facebook</span>
+                            </button>
+                        </div>
+
+                        <p class="text-center text-gray-500 mt-6">
+                            New to NINELIVES? <a href="#" id="show-signup" class="text-blue-600 hover:underline">Create
+                                an account</a>
+                        </p>
+                    </div>
+
+                    <!-- SIGNUP FORM (hidden by default) -->
+                    <div id="signup-form" class="hidden">
+                        <h2 class="text-3xl font-bold text-center mb-8">Create an Account</h2>
+
+                        <div class="mb-6">
+                            <input
+                                class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                id="signup-email" type="text" placeholder="Email or mobile number">
+                        </div>
+
+                        <div class="mb-6">
+                            <input
+                                class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                id="signup-password" type="password" placeholder="Password">
+                        </div>
+
+                        <div class="mb-6">
+                            <input
+                                class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                id="signup-confirm-password" type="password" placeholder="Confirm Password">
+                        </div>
+
+                        <button id="signup-submit"
+                            class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition mb-4">
+                            Sign Up
+                        </button>
+
+                        <p class="text-center text-gray-500 mt-6">
+                            Already have an account? <a href="#" id="show-login"
+                                class="text-blue-600 hover:underline">Login here</a>
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed inset-0 z-50 overflow-hidden hidden">
+        <div class="absolute inset-0 bg-black/30" id="cart-backdrop"></div>
+        <div
+            class="absolute inset-y-0 right-0 w-full sm:w-96 bg-white cart-sidebar transform transition-transform duration-300 translate-x-full">
+            <div class="flex flex-col h-full">
+                <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+                    <h2 class="text-xl font-bold">My Cart</h2>
+                    <button id="close-cart" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div id="cart-items" class="flex-1 overflow-y-auto p-6">
+                    <div class="flex flex-col items-center justify-center h-full">
+                        <div class="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                            <i class="fas fa-shopping-cart text-gray-400 text-3xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Your cart is empty</h3>
+                        <p class="text-gray-500 text-center mb-6">Looks like you haven't added anything to your cart yet
+                        </p>
+                        <button class="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition">
+                            Continue Shopping
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-6 border-t border-gray-200">
+                    <div class="flex justify-between mb-4">
+                        <span>Subtotal (<span id="sidebar-item-count">0</span> items):</span>
+                        <span id="cart-subtotal" class="font-bold text-lg">₹0</span>
+                    </div>
+                    <button id="checkout-btn"
+                        class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition flex items-center justify-center">
+                        <span>Proceed to Checkout</span>
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Size Selection Modal -->
+    <div id="sizeModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+        <div class="bg-white p-5 rounded-lg shadow-lg w-80 text-center">
+            <p class="text-lg font-semibold mb-4">Please select a size</p>
+            <button id="closeSizeModal" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
