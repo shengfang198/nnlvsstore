@@ -3,20 +3,14 @@
 // ========================
 require('dotenv').config();
 const express = require('express');
-// const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const { OAuth2Client } = require('google-auth-library');
 
-
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-const users = {}; // temporary in-memory storage
-const JWT_SECRET = process.env.JWT_SECRET;
-
-
 const app = express();
-
+const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // ========================
 // MIDDLEWARE
@@ -26,15 +20,16 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // ========================
-// DATABASE CONNECTION
+// IN-MEMORY STORAGE
 // ========================
-// const pool = new Pool({
-//   user: process.env.DB_USER,
-//   host: process.env.DB_HOST,
-//   database: process.env.DB_NAME,
-//   password: process.env.DB_PASS,
-//   port: process.env.DB_PORT,
-// });
+const users = {}; // { email: { name, email, password, cart: [] } }
+
+const products = [
+  { id: 'shirt01', name: 'Astro Shirt', images: ['white.png', 'red.png', 'blue.png'], price: 500 },
+  { id: 'shirt02', name: 'Tokyo', images: ['white.png'], price: 450 },
+  { id: 'shirt03', name: 'Cool Shirt', images: ['white.png'], price: 400 },
+  // Add more products here...
+];
 
 // ========================
 // AUTHENTICATION MIDDLEWARE
@@ -44,7 +39,7 @@ const authMiddleware = (req, res, next) => {
   if (!token) return res.status(401).json({ error: 'Unauthorized' });
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
     next();
   } catch {
@@ -56,10 +51,9 @@ const authMiddleware = (req, res, next) => {
 // ROUTES
 // ========================
 
-// ===== Google Client =====
+// ----- Google OAuth Login -----
 app.post('/auth/google', async (req, res) => {
   const { token } = req.body;
-
   if (!token) return res.status(400).json({ error: 'No token provided' });
 
   try {
@@ -67,6 +61,7 @@ app.post('/auth/google', async (req, res) => {
       idToken: token,
       audience: process.env.GOOGLE_CLIENT_ID
     });
+
     const payload = ticket.getPayload();
     const email = payload.email;
 
@@ -87,15 +82,14 @@ app.post('/auth/signup', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Fill all fields' });
 
+  if (users[email]) return res.status(400).json({ error: 'Email already exists' });
+
   try {
     const hashed = await bcrypt.hash(password, 10);
-    const result = await pool.query(
-      'INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email',
-      [email, hashed]
-    );
-    res.status(201).json({ message: 'Account created', user: result.rows[0] });
+    users[email] = { name: email.split('@')[0], email, password: hashed, cart: [] };
+    res.status(201).json({ message: 'Account created', user: { email, name: users[email].name } });
   } catch (err) {
-    if (err.code === '23505') return res.status(400).json({ error: 'Email exists' });
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -105,100 +99,63 @@ app.post('/auth/login', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Fill all fields' });
 
-  try {
-    const result = await pool.query('SELECT * FROM users WHERE email=$1', [email]);
-    const user = result.rows[0];
-    if (!user) return res.status(400).json({ error: 'Invalid credentials' });
+  const user = users[email];
+  if (!user) return res.status(400).json({ error: 'Invalid credentials' });
 
-    const match = await bcrypt.compare(password, user.password);
+  if (!user.password) return res.status(400).json({ error: 'Use Google login' });
 
-    if (!match) return res.status(400).json({ error: 'Invalid credentials' });
+  const match = await bcrypt.compare(password, user.password);
+  if (!match) return res.status(400).json({ error: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    res.json({ token });
-  } catch {
-    res.status(500).json({ error: 'Server error' });
-  }
+  const token = jwt.sign({ email, name: user.name }, JWT_SECRET, { expiresIn: '1d' });
+  res.json({ token });
 });
 
 // ----- Products -----
-app.get('/products', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM products');
-    res.json(result.rows);
-  } catch {
-    res.status(500).json({ error: 'Server error' });
-  }
+app.get('/products', (req, res) => {
+  res.json(products);
 });
 
 // ----- Cart Operations -----
-
 // Get Cart
-app.get('/cart', authMiddleware, async (req, res) => {
-  try {
-    const result = await pool.query(
-      `SELECT c.id, c.product_id, c.size, c.quantity, p.name, p.images, p.price
-       FROM carts c
-       JOIN products p ON c.product_id = p.id
-       WHERE c.user_id=$1`,
-      [req.user.id]
-    );
-    res.json(result.rows);
-  } catch {
-    res.status(500).json({ error: 'Server error' });
-  }
+app.get('/cart', authMiddleware, (req, res) => {
+  const user = users[req.user.email];
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  res.json(user.cart || []);
 });
 
 // Add to Cart
-app.post('/cart', authMiddleware, async (req, res) => {
+app.post('/cart', authMiddleware, (req, res) => {
   const { product_id, size, quantity } = req.body;
   if (!product_id || !size || !quantity) return res.status(400).json({ error: 'Missing fields' });
 
-  try {
-    const existing = await pool.query(
-      'SELECT * FROM carts WHERE user_id=$1 AND product_id=$2 AND size=$3',
-      [req.user.id, product_id, size]
-    );
+  const user = users[req.user.email];
+  if (!user) return res.status(404).json({ error: 'User not found' });
 
-    if (existing.rows.length > 0) {
-      await pool.query(
-        'UPDATE carts SET quantity = quantity + $1 WHERE user_id=$2 AND product_id=$3 AND size=$4',
-        [quantity, req.user.id, product_id, size]
-      );
-    } else {
-      await pool.query(
-        'INSERT INTO carts (user_id, product_id, size, quantity) VALUES ($1, $2, $3, $4)',
-        [req.user.id, product_id, size, quantity]
-      );
-    }
-
-    res.json({ message: 'Added to cart' });
-  } catch {
-    res.status(500).json({ error: 'Server error' });
+  const existing = user.cart.find(c => c.product_id === product_id && c.size === size);
+  if (existing) {
+    existing.quantity += quantity;
+  } else {
+    user.cart.push({ product_id, size, quantity });
   }
+
+  res.json({ message: 'Added to cart' });
 });
 
 // Remove from Cart
-app.delete('/cart', authMiddleware, async (req, res) => {
+app.delete('/cart', authMiddleware, (req, res) => {
   const { product_id, size } = req.body;
   if (!product_id || !size) return res.status(400).json({ error: 'Missing fields' });
 
-  try {
-    await pool.query(
-      'DELETE FROM carts WHERE user_id=$1 AND product_id=$2 AND size=$3',
-      [req.user.id, product_id, size]
-    );
-    res.json({ message: 'Removed from cart' });
-  } catch (err) {
-    console.error(err); // <-- add this
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+  const user = users[req.user.email];
+  if (!user) return res.status(404).json({ error: 'User not found' });
 
+  user.cart = user.cart.filter(c => !(c.product_id === product_id && c.size === size));
+  res.json({ message: 'Removed from cart' });
+});
 
 // ========================
 // START SERVER
 // ========================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
-
