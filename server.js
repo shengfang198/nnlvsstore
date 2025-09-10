@@ -10,7 +10,7 @@ const { OAuth2Client } = require('google-auth-library');
 
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, `${process.env.BASE_URL}/auth/google/callback`);
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // ========================
 // MIDDLEWARE
@@ -28,6 +28,7 @@ const products = [
   { id: 'shirt01', name: 'Astro Shirt', images: ['white.png', 'red.png', 'blue.png'], price: 500 },
   { id: 'shirt02', name: 'Tokyo', images: ['white.png'], price: 450 },
   { id: 'shirt03', name: 'Cool Shirt', images: ['white.png'], price: 400 },
+  // Add more products here...
 ];
 
 // ========================
@@ -50,45 +51,33 @@ const authMiddleware = (req, res, next) => {
 // ROUTES
 // ========================
 
-// ----- Google OAuth Redirect Flow -----
-app.get('/auth/google', (req, res) => {
-  const url = googleClient.generateAuthUrl({
-    access_type: 'offline',
-    scope: ['profile', 'email'],
-  });
-  res.redirect(url);
-});
-
-app.get('/auth/google/callback', async (req, res) => {
-  const code = req.query.code;
-  if (!code) return res.status(400).json({ error: 'Missing code' });
+// ----- Google OAuth Login -----
+app.post('/auth/google', async (req, res) => {
+  const { token } = req.body;
+  if (!token) return res.status(400).json({ error: 'No token provided' });
 
   try {
-    const { tokens } = await googleClient.getToken(code);
     const ticket = await googleClient.verifyIdToken({
-      idToken: tokens.id_token,
-      audience: process.env.GOOGLE_CLIENT_ID,
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID
     });
 
     const payload = ticket.getPayload();
     const email = payload.email;
-    const name = payload.name;
 
     if (!users[email]) {
-      users[email] = { name, email, password: null, cart: [] };
+      users[email] = { name: payload.name, email, password: null, cart: [] };
     }
 
-    const jwtToken = jwt.sign({ email, name }, JWT_SECRET, { expiresIn: '1d' });
-
-    // Redirect to myecommerce.html inside public/myecommerce/
-    res.redirect(`/myecommerce.html?token=${jwtToken}`);
+    const jwtToken = jwt.sign({ email, name: payload.name }, JWT_SECRET, { expiresIn: '1d' });
+    res.json({ token: jwtToken, user: { email, name: payload.name } });
   } catch (err) {
     console.error('Google auth error:', err);
-    res.status(401).json({ error: 'Authentication failed' });
+    res.status(401).json({ error: 'Invalid Google token' });
   }
 });
 
-// ----- Email/Password Signup -----
+// ----- Signup -----
 app.post('/auth/signup', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Fill all fields' });
@@ -105,7 +94,7 @@ app.post('/auth/signup', async (req, res) => {
   }
 });
 
-// ----- Email/Password Login -----
+// ----- Login -----
 app.post('/auth/login', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Fill all fields' });
@@ -128,12 +117,14 @@ app.get('/products', (req, res) => {
 });
 
 // ----- Cart Operations -----
+// Get Cart
 app.get('/cart', authMiddleware, (req, res) => {
   const user = users[req.user.email];
   if (!user) return res.status(404).json({ error: 'User not found' });
   res.json(user.cart || []);
 });
 
+// Add to Cart
 app.post('/cart', authMiddleware, (req, res) => {
   const { product_id, size, quantity } = req.body;
   if (!product_id || !size || !quantity) return res.status(400).json({ error: 'Missing fields' });
@@ -151,6 +142,7 @@ app.post('/cart', authMiddleware, (req, res) => {
   res.json({ message: 'Added to cart' });
 });
 
+// Remove from Cart
 app.delete('/cart', authMiddleware, (req, res) => {
   const { product_id, size } = req.body;
   if (!product_id || !size) return res.status(400).json({ error: 'Missing fields' });
@@ -167,6 +159,4 @@ app.delete('/cart', authMiddleware, (req, res) => {
 // ========================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
-
-
 
