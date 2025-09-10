@@ -9,6 +9,12 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const { OAuth2Client } = require('google-auth-library');
 
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const users = {}; // temporary in-memory storage
+const JWT_SECRET = process.env.JWT_SECRET;
+
+
 const app = express();
 
 
@@ -51,26 +57,29 @@ const authMiddleware = (req, res, next) => {
 // ========================
 
 // ===== Google Client =====
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
 app.post('/auth/google', async (req, res) => {
-    const { token } = req.body;
-    try {
-        const ticket = await googleClient.verifyIdToken({
-            idToken: token,
-            audience: process.env.GOOGLE_CLIENT_ID
-        });
-        const payload = ticket.getPayload();
-        const email = payload.email;
+  const { token } = req.body;
 
-        if (!users[email]) users[email] = { name: payload.name, password: null, cart: [] };
+  if (!token) return res.status(400).json({ error: 'No token provided' });
 
-        const jwtToken = jwt.sign({ email, name: payload.name }, JWT_SECRET, { expiresIn: '1d' });
-        res.json({ token: jwtToken, user: { email, name: payload.name } });
-    } catch (err) {
-        console.error(err);
-        res.status(401).json({ error: 'Invalid Google token' });
+  try {
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+    const payload = ticket.getPayload();
+    const email = payload.email;
+
+    if (!users[email]) {
+      users[email] = { name: payload.name, email, password: null, cart: [] };
     }
+
+    const jwtToken = jwt.sign({ email, name: payload.name }, JWT_SECRET, { expiresIn: '1d' });
+    res.json({ token: jwtToken, user: { email, name: payload.name } });
+  } catch (err) {
+    console.error('Google auth error:', err);
+    res.status(401).json({ error: 'Invalid Google token' });
+  }
 });
 
 // ----- Signup -----
@@ -192,3 +201,4 @@ app.delete('/cart', authMiddleware, async (req, res) => {
 // ========================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+
